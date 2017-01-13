@@ -1,26 +1,16 @@
 var expect = require('expect');
 var request = require('supertest');
+var _ = require('lodash');
 
 
 var app = require('./../server').app;
 var Todo = require("../models/todo").Todo;
-
-var todos = [{
-    text: "first text todo"
-}, {
-    text: "second text todo"
-}
-];
+var ObjectID = require('mongodb').ObjectID;
+const {todos, populate, populateUsers, users}=require('./seed');
 
 
-beforeEach(function (done) {
-    Todo.remove()
-        .then(function () {
-            return Todo.insertMany(todos);
-        }).then(function () {
-        return done();
-    })
-})
+beforeEach(populateUsers);
+beforeEach(populate);
 
 
 describe("POST /todos", function () {
@@ -90,3 +80,86 @@ describe("GET /todos", function () {
     })
 });
 
+
+describe("DELETE /todos:id", function () {
+
+
+    it("should delete todo", (done) => {
+        var hexId = todos[1]._id.toHexString();
+        request(app)
+            .delete(`/todos/${hexId}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo_id).toBe(hexId);
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err);
+                }
+                Todo.findById(hexId)
+                    .then((todos) => {
+
+                        expect(todos).toNotExist();
+                        done();
+                    })
+                    .catch((err) => done(err))
+            })
+
+    })
+
+
+    it("should return 404 if todo not found", (done) => {
+        var hexId = new ObjectID();
+        request(app)
+            .delete(`/todos/${hexId}`)
+            .expect(400)
+            .end(done);
+    });
+    it("should return 404 if Object ID id invalid", () => {
+    });
+
+
+});
+
+
+describe("PATCH /todo:id", (done) => {
+    it("shold update todo", () => {
+        var todo = todos[1]._id;
+        text = "new updated text";
+
+        request(app)
+            .patch(`/todos/${todo}`)
+            .send({
+                text,
+                completed: true
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(text);
+            })
+            .end(done);
+
+
+    });
+    it("shold clear completed at if todo is not competed", () => {
+    });
+
+});
+
+describe('GET /users/me', function () {
+    it("should return user is autenticate", (done) => {
+
+        console.log(" :", "users=", users[0].tokens[0].token);
+        request(app)
+            .get('/users/me')
+            .set('x-auth', users[0].tokens[0].token)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body._id).toBe(users[0]._id.toHexString())
+            })
+            .end(done);
+
+    });
+    it("should return 401  is not autenticate", (done) => {
+    });
+})
