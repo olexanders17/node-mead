@@ -1,4 +1,5 @@
 require("./config/config");
+var port = parseInt(process.env.PORT)||3000;
 
 //console.log(" :", "process.env=", process.env);
 var express = require('express');
@@ -14,7 +15,7 @@ var authenticate = require("./middleware/authenticate").authenticate;
 
 
 var app = express();
-var port = parseInt(process.env.PORT)||3000;
+
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
