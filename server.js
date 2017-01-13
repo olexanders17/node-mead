@@ -1,6 +1,6 @@
 require("./config/config");
 
-console.log(" :", "process.env=", process.env);
+//console.log(" :", "process.env=", process.env);
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('lodash');
@@ -14,7 +14,7 @@ var authenticate = require("./middleware/authenticate").authenticate;
 
 
 var app = express();
-var port = parseInt(process.env.PORT);
+var port = parseInt(process.env.PORT)||3000;
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
@@ -138,6 +138,6 @@ app.get("/users/me", authenticate, function (req, res) {
     res.send(req.user);
 });
 
-app.listen(3000, () => console.log(`listen on ${port}`))
+app.listen(port, () => console.log(`listen on ${port}`))
 
 module.exports.app = app;
