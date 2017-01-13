@@ -7,6 +7,9 @@
     "start": "server.js",
     "test": "SET NODE_ENV=test &&  mocha tests/*.test.js "
   },
+  "engines": {
+    "node": "6.2.2"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
