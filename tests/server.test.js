@@ -84,6 +84,9 @@ describe('GET /users/me', function () {
 })
 
 
+
+
+
 describe("POST /todos", function () {
     it("should create new todo", function (done) {
         var txt = "Test todo text";
