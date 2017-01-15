@@ -1,5 +1,6 @@
 require("./config/config");
-var port = parseInt(process.env.PORT)||3000;
+console.log(" :", "process.env.MONGO_URI=", process.env.MONGO_URI);
+var port = parseInt(process.env.PORT) || 3000;
 
 //console.log(" :", "process.env=", process.env);
 var express = require('express');
@@ -135,9 +136,55 @@ app.post("/users", (req, res) => {
 });
 
 
+app.get("/users", function (req, res) {
+    User.find({})
+        .then(function (users) {
+            res.send({
+                users, statusCode: 200
+            });
+        })
+        .catch(function (err) {
+            res.send(err);
+        })
+});
+
+
 app.get("/users/me", authenticate, function (req, res) {
     res.send(req.user);
 });
+
+app.post('/users/login', function (req, res) {
+
+    var body = _.pick(req.body, ['email', 'password'])
+
+    User.findByCredentials(body.email, body.password)
+        .then(function (user) {
+            return user.generateAuthToken()
+                .then(function (token) {
+                    res.header('x-auth', token).send(user);
+
+                })
+
+
+        })
+        .catch(function (err) {
+            res.status(400).send(err)
+        })
+
+
+});
+
+
+app.delete("/users/me/token", authenticate, function (req, res) {
+    req.user.removeToken(req.token)
+        .then(function () {
+            res.status(200).send();
+        })
+        .catch(function (err) {
+            res.status(400).send({err});
+        })
+})
+
 
 app.listen(port, () => console.log(`listen on ${port}`))
 

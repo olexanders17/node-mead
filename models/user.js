@@ -38,8 +38,9 @@ var UserSchema = new mongoose.Schema({
 
 UserSchema.methods.toJSON = function () {
     var user = this;
-    var userObject = user.toObject()
+    var userObject = user.toObject();
 
+    console.log(_.pick(userObject, ['_id', 'email']));
     return _.pick(userObject, ['_id', 'email']);
 
 };
@@ -76,6 +77,45 @@ UserSchema.statics.findByToken = function (token) {
 
 }
 
+
+UserSchema.statics.findByCredentials = function (email, password) {
+
+    var User = this;
+
+    return User.findOne({email})
+        .then(function (user) {
+
+            if (!user) {
+                return Promise.reject();
+            }
+
+            return new Promise(function (resolve, reject) {
+                bcrypt.compare(password, user.password, function (err, res) {
+
+                    if (err) {
+
+                        reject(err);
+                    } else {
+                        resolve(user);
+                    }
+
+                });
+            })
+
+        })
+
+
+}
+
+UserSchema.methods.removeToken = function (token) {
+    var user = this;
+    return user.update({
+        $pull: {
+            tokens: {token}
+        }
+    })
+};
+
 UserSchema.pre('save', function (next) {
 
     var user = this;
@@ -87,7 +127,6 @@ UserSchema.pre('save', function (next) {
                 next();
             })
         })
-
     } else {
         next();
     }
