@@ -12,7 +12,7 @@ const users = [{
     password: 'userPass',
     tokens: [{
         access: "auth",
-        token: jwt.sign({_id: userOneId, access: 'auth'}, 'abc123').toString()
+        token: jwt.sign({_id: userOneId, access: 'auth'}, process.env.JWT_SECRET).toString()
     }]
 
 },
@@ -20,19 +20,25 @@ const users = [{
     {
         _id: userTwoId,
         email: 'aassa@ddd.df',
-        password: 'userPssass'
+        password: 'userPssass',
+        tokens: [{
+            access: "auth",
+            token: jwt.sign({_id: userTwoId, access: 'auth'}, process.env.JWT_SECRET).toString()
+        }]
     }
 ];
 
 var todos = [
     {
         _id: new ObjectID(),
-        text: "first text todo"
+        text: "first text todo",
+        _creator: userOneId
     },
     {
         _id: new ObjectID(),
         text: "second text todo",
-        completedAt: 3333
+        completedAt: 3333,
+        _creator: userTwoId
     }
 ];
 

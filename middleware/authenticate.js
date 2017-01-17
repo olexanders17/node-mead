@@ -2,6 +2,8 @@ var User = require('./../models/user').User;
 
 
 module.exports.authenticate = function (req, res, next) {
+//add user to request by enctryptinf token
+
     var token = req.header('x-auth');
 
 

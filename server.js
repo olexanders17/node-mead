@@ -25,9 +25,12 @@ app.get("/", function (req, res) {
     res.send("hello world")
 });
 
-app.post("/todos", function (req, res) {
+app.post("/todos", authenticate, function (req, res) {
 
-    var todo = new Todo(req.body);
+    var todo = new Todo({
+        text: req.body.text,
+        _creator: req.user._id
+    });
     todo.save()
         .then(function (todo) {
 
@@ -40,8 +43,10 @@ app.post("/todos", function (req, res) {
 
 });
 
-app.get("/todos", function (req, res) {
-    Todo.find({})
+app.get("/todos", authenticate, function (req, res) {
+    Todo.find({
+        _creator: req.user._id
+    })
         .then(function (todos) {
             res.send({todos, statusCode: 200});
         })
@@ -50,8 +55,11 @@ app.get("/todos", function (req, res) {
         })
 });
 
-app.get("/todos/:id", function (req, res) {
-    Todo.findById(req.params.id)
+app.get("/todos/:id", authenticate, function (req, res) {
+    Todo.findOne({
+        _id: req.params.id,
+        _creator: req.users._id
+    })
         .then(function (todos) {
             res.send({todos, statusCode: 200});
         })
@@ -60,14 +68,17 @@ app.get("/todos/:id", function (req, res) {
         })
 });
 
-app.delete("/todos/:id", function (req, res) {
+app.delete("/todos/:id",authenticate, function (req, res) {
 
     if (!ObjectID.isValid(req.params.id)) {
         return res.status(400).send("id is not valid");
     }
 
 
-    Todo.findOneAndRemove({_id: req.params.id})
+    Todo.findOneAndRemove({
+        _id: req.params.id,
+        _creator:req.user._id
+    })
         .then(function (todos) {
             if (!todos) {
                 res.status(400).send("soryy not found")
